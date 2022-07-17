@@ -15,13 +15,7 @@ fn main() {
             height: 512.0,
             ..Default::default()
         })
-        .add_plugins(DefaultPlugins)
-        .add_plugin(WorldInspectorPlugin::new())
-        .add_plugin(LdtkPlugin)
-        .add_plugin(player::PlayerPlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .insert_resource(LevelSelection::Index(0))
-        .add_plugin(WallPlugin)
         .insert_resource(LdtkSettings {
             level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
                 load_level_neighbors: true,
@@ -29,6 +23,12 @@ fn main() {
             set_clear_color: SetClearColor::FromLevelBackground,
             ..Default::default()
         })
+        .add_plugins(DefaultPlugins)
+        .add_plugin(WorldInspectorPlugin::new())
+        .add_plugin(LdtkPlugin)
+        .add_plugin(player::PlayerPlugin)
+        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
+        .add_plugin(WallPlugin)
         .add_startup_system(setup)
         .add_system(set_texture_filters_to_nearest)
         .add_system(camera_fit_inside_current_level)
