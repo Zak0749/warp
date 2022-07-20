@@ -64,6 +64,21 @@ impl From<EntityInstance> for Activators {
     }
 }
 
+#[derive(Bundle)]
+struct DoorCollision {
+    collider: Collider,
+    rigid_body: RigidBody,
+}
+
+impl Default for DoorCollision {
+    fn default() -> Self {
+        Self {
+            collider: Collider::cuboid(24.0 / 2.0, 24.0 / 2.0),
+            rigid_body: RigidBody::Fixed,
+        }
+    }
+}
+
 fn door_mapping(
     mut door_query: Query<(&mut Activators, &EntityInstance), Added<Door>>,
     switch_query: Query<(Entity, &EntityInstance), Added<Switch>>,
@@ -91,15 +106,22 @@ fn door_mapping(
     }
 }
 
-fn door_opening(mut door_query: Query<(&mut TextureAtlasSprite, &Activators), With<Door>>) {
-    for (mut sprite, activators) in door_query.iter_mut() {
+fn door_opening(
+    mut door_query: Query<(&mut TextureAtlasSprite, &Activators, Entity), With<Door>>,
+    mut commands: Commands,
+) {
+    for (mut sprite, activators, entity) in door_query.iter_mut() {
         if (matches!(activators.control, DoorControl::Or) && activators.pressed.len() > 0)
             || (matches!(activators.control, DoorControl::And)
                 && activators.pressed.len() == activators.switches.len())
         {
             sprite.index = 3;
+            commands.entity(entity).remove_bundle::<DoorCollision>();
         } else {
             sprite.index = 0;
+            commands
+                .entity(entity)
+                .insert_bundle(DoorCollision::default());
         }
     }
 }

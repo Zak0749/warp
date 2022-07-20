@@ -39,6 +39,7 @@ struct PlayerCollision {
     gravity_scale: GravityScale,
     locked_axis: LockedAxes,
     friction: Friction,
+    dampening: Damping,
 }
 
 impl From<EntityInstance> for PlayerCollision {
@@ -74,6 +75,10 @@ impl From<EntityInstance> for PlayerCollision {
             gravity_scale: GravityScale(0.0),
             locked_axis: LockedAxes::ROTATION_LOCKED,
             friction: Friction::coefficient(0.0),
+            dampening: Damping {
+                linear_damping: 30.0,
+                angular_damping: 0.0,
+            },
         }
     }
 }
@@ -118,18 +123,17 @@ fn player_movement_system(
     mut player_query: Query<(&mut Velocity, &ActionState<PlayerAction>), With<Player>>,
 ) {
     for (mut vel, action_state) in player_query.iter_mut() {
-        vel.linvel = Vec2::new(0.0, 0.0);
         if action_state.pressed(PlayerAction::Up) {
-            vel.linvel.y += 100.0;
+            vel.linvel.y = 100.0;
         }
         if action_state.pressed(PlayerAction::Down) {
-            vel.linvel.y -= 100.0;
+            vel.linvel.y = -100.0;
         }
         if action_state.pressed(PlayerAction::Right) {
-            vel.linvel.x += 100.0;
+            vel.linvel.x = 100.0;
         }
         if action_state.pressed(PlayerAction::Left) {
-            vel.linvel.x -= 100.0;
+            vel.linvel.x = -100.0;
         }
     }
 }

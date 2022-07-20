@@ -60,13 +60,13 @@ fn button_collisons(
     for collison in collision_events.iter() {
         for (mut sprite, entity) in button_query.iter_mut() {
             match collison {
-                CollisionEvent::Started(_, e, _) => {
+                CollisionEvent::Started(e, _, _) => {
                     if &entity == e {
                         sprite.index = 1;
                         pressed_event.send(SwitchPressedEvent(entity, true));
                     }
                 }
-                CollisionEvent::Stopped(_, e, _) => {
+                CollisionEvent::Stopped(e, _, _) => {
                     if &entity == e {
                         sprite.index = 0;
                         pressed_event.send(SwitchPressedEvent(entity, false));

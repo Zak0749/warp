@@ -2,6 +2,7 @@ use self::prelude::*;
 use bevy::render::render_resource::TextureUsages;
 use player::Player;
 
+mod r#box;
 mod door;
 mod player;
 mod prelude;
@@ -11,8 +12,8 @@ mod wall;
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
-            width: 512.0,
-            height: 512.0,
+            width: 1028.0,
+            height: 1028.0,
             ..Default::default()
         })
         .insert_resource(LevelSelection::Index(0))
@@ -29,6 +30,7 @@ fn main() {
         .add_plugin(wall::WallPlugin)
         .add_plugin(door::DoorPlugin)
         .add_plugin(switch::SwitchPlugin)
+        .add_plugin(r#box::BoxPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
         .add_startup_system(setup)
         .add_system(set_texture_filters_to_nearest)
