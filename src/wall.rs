@@ -62,15 +62,12 @@ fn spawn_wall_collision(
                     .find(|v| v.identifier == "Walls")
                     .expect("Level should have a Walls layer");
 
-                // dbg!(width, height);
                 let mut plate_stack: Vec<Vec<Plate>> = Vec::new();
 
                 for y in 0..height {
                     let mut row_plates: Vec<Plate> = Vec::new();
                     let mut plate_start = None;
 
-                    // + 1 to the width so the algorithm "terminates" plates that touch the right
-                    // edge
                     for x in 0..width + 1 {
                         match (plate_start, level_walls.contains(&GridCoords { x, y })) {
                             (Some(s), false) => {
@@ -91,8 +88,6 @@ fn spawn_wall_collision(
                 let mut wall_rects: Vec<Rect<i32>> = Vec::new();
                 let mut previous_rects: HashMap<Plate, Rect<i32>> = HashMap::new();
 
-                // an extra empty row so the algorithm "terminates" the rects that touch the top
-                // edge
                 plate_stack.push(Vec::new());
 
                 for (y, row) in plate_stack.iter().enumerate() {
@@ -119,7 +114,6 @@ fn spawn_wall_collision(
                         }
                     }
 
-                    // Any plates that weren't removed above have terminated
                     wall_rects.append(&mut previous_rects.values().copied().collect());
                     previous_rects = current_rects;
                 }
