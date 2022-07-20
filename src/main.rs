@@ -1,13 +1,13 @@
 use self::prelude::*;
 use bevy::render::render_resource::TextureUsages;
-use bevy_inspector_egui::WorldInspectorPlugin;
 use player::Player;
 
-use wall::WallPlugin;
-
+mod door;
 mod player;
 mod prelude;
+mod switch;
 mod wall;
+
 fn main() {
     App::new()
         .insert_resource(WindowDescriptor {
@@ -24,15 +24,15 @@ fn main() {
             ..Default::default()
         })
         .add_plugins(DefaultPlugins)
-        .add_plugin(WorldInspectorPlugin::new())
         .add_plugin(LdtkPlugin)
         .add_plugin(player::PlayerPlugin)
+        .add_plugin(wall::WallPlugin)
+        .add_plugin(door::DoorPlugin)
+        .add_plugin(switch::SwitchPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
-        .add_plugin(WallPlugin)
         .add_startup_system(setup)
         .add_system(set_texture_filters_to_nearest)
         .add_system(camera_fit_inside_current_level)
-        .add_system(display_events)
         .run();
 }
 
@@ -40,7 +40,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
 
     commands.spawn_bundle(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("Untitled.ldtk"),
+        ldtk_handle: asset_server.load("Levels.ldtk"),
         ..Default::default()
     });
 }
@@ -121,11 +121,5 @@ pub fn camera_fit_inside_current_level(
                 }
             }
         }
-    }
-}
-
-fn display_events(mut collision_events: EventReader<CollisionEvent>) {
-    for collision_event in collision_events.iter() {
-        println!("Received collision event: {:?}", collision_event);
     }
 }
