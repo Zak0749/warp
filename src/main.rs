@@ -16,7 +16,7 @@ fn main() {
             height: 1028.0,
             ..Default::default()
         })
-        .insert_resource(LevelSelection::Index(0))
+        .insert_resource(LevelSelection::Uid(0))
         .insert_resource(LdtkSettings {
             level_spawn_behavior: LevelSpawnBehavior::UseWorldTranslation {
                 load_level_neighbors: true,
@@ -35,6 +35,7 @@ fn main() {
         .add_startup_system(setup)
         .add_system(set_texture_filters_to_nearest)
         .add_system(camera_fit_inside_current_level)
+        .add_system(update_level_selection)
         .run();
 }
 
@@ -64,7 +65,7 @@ fn set_texture_filters_to_nearest(
 
 const ASPECT_RATIO: f32 = 1. / 1.;
 
-pub fn camera_fit_inside_current_level(
+fn camera_fit_inside_current_level(
     mut camera_query: Query<
         (
             &mut bevy::render::camera::OrthographicProjection,
@@ -118,6 +119,35 @@ pub fn camera_fit_inside_current_level(
 
                     camera_transform.translation.x += level_transform.translation.x;
                     camera_transform.translation.y += level_transform.translation.y;
+                }
+            }
+        }
+    }
+}
+
+fn update_level_selection(
+    level_query: Query<(&Handle<LdtkLevel>, &Transform), Without<Player>>,
+    player_query: Query<&Transform, With<Player>>,
+    mut level_selection: ResMut<LevelSelection>,
+    ldtk_levels: Res<Assets<LdtkLevel>>,
+) {
+    for (level_handle, level_transform) in level_query.iter() {
+        if let Some(ldtk_level) = ldtk_levels.get(level_handle) {
+            let level_bounds = Rect {
+                bottom: level_transform.translation.y,
+                top: level_transform.translation.y + ldtk_level.level.px_hei as f32,
+                left: level_transform.translation.x,
+                right: level_transform.translation.x + ldtk_level.level.px_wid as f32,
+            };
+
+            for player_transform in player_query.iter() {
+                if player_transform.translation.x < level_bounds.right
+                    && player_transform.translation.x > level_bounds.left
+                    && player_transform.translation.y < level_bounds.top
+                    && player_transform.translation.y > level_bounds.bottom
+                    && !level_selection.is_match(&0, &ldtk_level.level)
+                {
+                    *level_selection = LevelSelection::Iid(ldtk_level.level.iid.clone());
                 }
             }
         }
