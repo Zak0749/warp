@@ -1,10 +1,9 @@
-use super::prelude::*;
+use super::*;
 
 pub struct BoxPlugin;
 
 impl Plugin for BoxPlugin {
     fn build(&self, app: &mut App) {
-        println!("BoxPlugin::build");
         app.register_ldtk_entity::<BoxBundle>("Box");
     }
 }

@@ -1,12 +1,16 @@
-use super::prelude::*;
+use super::*;
 
 pub struct SwitchPlugin;
 
 impl Plugin for SwitchPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system(button_collisons)
-            .add_event::<SwitchPressedEvent>()
-            .register_ldtk_entity::<SwitchBundle>("Switch");
+        app.add_event::<SwitchPressedEvent>()
+            .register_ldtk_entity::<SwitchBundle>("Switch")
+            .add_system(
+                button_collisons
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            );
     }
 }
 

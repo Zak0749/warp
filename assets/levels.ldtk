@@ -433,7 +433,7 @@
 			"__cHei": 8,
 			"identifier": "Terrain",
 			"uid": 34,
-			"relPath": "Terrain.png",
+			"relPath": "tilemaps/Terrain.png",
 			"embedAtlas": null,
 			"pxWid": 64,
 			"pxHei": 64,
@@ -447,7 +447,7 @@
 			"savedSelections": [],
 			"cachedPixelData": {
 				"opaqueTiles": "1111111100011111000111111000111011110000111100001111000011110000",
-				"averageColors": "f334f334f000faaaf888f888f888faaa1f1e1f1e1f1ef889f889f888f889f889943494341f1ef99afaabfaaafaabf99af3331f1e1f1ecaaafbbbfaabfbbbcaaaf556f556faaafaaa1f1e1f1e1f1e1f1ef556f556f888f8881f1e1f1e1f1e1f1ef455f455f888f8881f1e1f1e1f1e1f1ef999f888f666f6661f1e1f1e1f1e1f1e"
+				"averageColors": "f334f334f000faaaf888f888f888faaa000000000000f889f889f888f889f889833383330000f99afaabfaaafaabf99af33300000000baaafbbbfaabfbbbbaaaf556f556faaafaaa0000000000000000f556f556f888f8880000000000000000f455f455f888f8880000000000000000f999f888f666f6660000000000000000"
 			}
 		},
 		{
@@ -455,7 +455,7 @@
 			"__cHei": 4,
 			"identifier": "Player",
 			"uid": 40,
-			"relPath": "Player.png",
+			"relPath": "tilemaps/Player.png",
 			"embedAtlas": null,
 			"pxWid": 128,
 			"pxHei": 128,
@@ -474,7 +474,7 @@
 			"__cHei": 1,
 			"identifier": "Switch",
 			"uid": 62,
-			"relPath": "Switch.png",
+			"relPath": "tilemaps/Switch.png",
 			"embedAtlas": null,
 			"pxWid": 32,
 			"pxHei": 16,
@@ -493,7 +493,7 @@
 			"__cHei": 1,
 			"identifier": "Door",
 			"uid": 63,
-			"relPath": "Door.png",
+			"relPath": "tilemaps/Door.png",
 			"embedAtlas": null,
 			"pxWid": 96,
 			"pxHei": 24,
@@ -505,14 +505,14 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "1000", "averageColors": "faaac99a88896889" }
+			"cachedPixelData": { "opaqueTiles": "1000", "averageColors": "faaab99a78895889" }
 		},
 		{
 			"__cWid": 1,
 			"__cHei": 1,
 			"identifier": "Box",
 			"uid": 70,
-			"relPath": "Box.png",
+			"relPath": "tilemaps/Box.png",
 			"embedAtlas": null,
 			"pxWid": 16,
 			"pxHei": 16,
@@ -524,14 +524,14 @@
 			"enumTags": [],
 			"customData": [],
 			"savedSelections": [],
-			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "dda7" }
+			"cachedPixelData": { "opaqueTiles": "0", "averageColors": "dc95" }
 		},
 		{
 			"__cWid": 4,
 			"__cHei": 4,
 			"identifier": "Player_2",
 			"uid": 71,
-			"relPath": "Player 2.png",
+			"relPath": "tilemaps/Player 2.png",
 			"embedAtlas": null,
 			"pxWid": 80,
 			"pxHei": 80,
@@ -663,12 +663,12 @@
 									"entityIid": "cf8441a0-02f0-11ed-b439-2f2b367ee4e0",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "89467ff0-02f0-11ed-a7d4-c53d799d3f30"
+									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
 								}, {
 									"entityIid": "ceb13a30-02f0-11ed-b439-1fadee9e1943",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "89467ff0-02f0-11ed-a7d4-c53d799d3f30"
+									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
 								} ], "__type": "Array<EntityRef>", "__tile": null, "defUid": 52, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["cf8441a0-02f0-11ed-b439-2f2b367ee4e0"]
@@ -699,12 +699,12 @@
 									"entityIid": "cd5b9540-02f0-11ed-b439-0394ad6479a6",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "89467ff0-02f0-11ed-a7d4-c53d799d3f30"
+									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
 								}, {
 									"entityIid": "ce17b950-02f0-11ed-b439-377d80ada669",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "89467ff0-02f0-11ed-a7d4-c53d799d3f30"
+									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
 								} ], "__type": "Array<EntityRef>", "__tile": null, "defUid": 52, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["cd5b9540-02f0-11ed-b439-0394ad6479a6"]
@@ -767,7 +767,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 34,
-					"__tilesetRelPath": "Terrain.png",
+					"__tilesetRelPath": "tilemaps/Terrain.png",
 					"iid": "886b9a40-02f0-11ed-b439-37f6f4310dfd",
 					"levelId": 0,
 					"layerDefUid": 35,
@@ -1251,7 +1251,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 34,
-					"__tilesetRelPath": "Terrain.png",
+					"__tilesetRelPath": "tilemaps/Terrain.png",
 					"iid": "971f1210-02f0-11ed-b439-f15d71a5e80d",
 					"levelId": 0,
 					"layerDefUid": 68,
@@ -2402,7 +2402,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 34,
-					"__tilesetRelPath": "Terrain.png",
+					"__tilesetRelPath": "tilemaps/Terrain.png",
 					"iid": "63411981-02f0-11ed-a7d4-cf8e77969183",
 					"levelId": 73,
 					"layerDefUid": 35,
@@ -2452,7 +2452,7 @@
 					"__pxTotalOffsetX": 0,
 					"__pxTotalOffsetY": 0,
 					"__tilesetDefUid": 34,
-					"__tilesetRelPath": "Terrain.png",
+					"__tilesetRelPath": "tilemaps/Terrain.png",
 					"iid": "63411984-02f0-11ed-a7d4-631ef04d5710",
 					"levelId": 73,
 					"layerDefUid": 68,

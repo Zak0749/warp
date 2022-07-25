@@ -1,13 +1,13 @@
 use std::collections::{HashMap, HashSet};
 
-use super::prelude::*;
+use super::*;
 
 pub struct WallPlugin;
 
 impl Plugin for WallPlugin {
     fn build(&self, app: &mut App) {
         app.register_ldtk_int_cell_for_layer::<WallBundle>("Walls", 1)
-            .add_system(spawn_wall_collision);
+            .add_system(spawn_wall_collision.run_in_state(GameState::InGame));
     }
 }
 

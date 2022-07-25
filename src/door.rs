@@ -1,14 +1,21 @@
-use super::prelude::*;
-use crate::switch::{Switch, SwitchPressedEvent};
+use super::*;
 
 pub struct DoorPlugin;
 
 impl Plugin for DoorPlugin {
     fn build(&self, app: &mut App) {
         app.register_ldtk_entity::<DoorBundle>("Door")
-            .add_system(door_opening)
-            .add_system(door_mapping)
-            .add_system(door_open_tracker);
+            .add_system(
+                opening_door
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
+            .add_system(link_door_inputs.run_in_state(GameState::InGame))
+            .add_system(
+                track_door_switches
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            );
     }
 }
 
@@ -79,7 +86,30 @@ impl Default for DoorCollision {
     }
 }
 
-fn door_mapping(
+fn opening_door(
+    mut door_query: Query<
+        (&mut TextureAtlasSprite, &Activators, Entity),
+        (With<Door>, Changed<Activators>),
+    >,
+    mut commands: Commands,
+) {
+    for (mut sprite, activators, entity) in door_query.iter_mut() {
+        if (matches!(activators.control, DoorControl::Or) && activators.pressed.len() > 0)
+            || (matches!(activators.control, DoorControl::And)
+                && activators.pressed.len() == activators.switches.len())
+        {
+            sprite.index = 3;
+            commands.entity(entity).remove_bundle::<DoorCollision>();
+        } else {
+            sprite.index = 0;
+            commands
+                .entity(entity)
+                .insert_bundle(DoorCollision::default());
+        }
+    }
+}
+
+fn link_door_inputs(
     mut door_query: Query<(&mut Activators, &EntityInstance), Added<Door>>,
     switch_query: Query<(Entity, &EntityInstance), Added<Switch>>,
 ) {
@@ -106,27 +136,7 @@ fn door_mapping(
     }
 }
 
-fn door_opening(
-    mut door_query: Query<(&mut TextureAtlasSprite, &Activators, Entity), With<Door>>,
-    mut commands: Commands,
-) {
-    for (mut sprite, activators, entity) in door_query.iter_mut() {
-        if (matches!(activators.control, DoorControl::Or) && activators.pressed.len() > 0)
-            || (matches!(activators.control, DoorControl::And)
-                && activators.pressed.len() == activators.switches.len())
-        {
-            sprite.index = 3;
-            commands.entity(entity).remove_bundle::<DoorCollision>();
-        } else {
-            sprite.index = 0;
-            commands
-                .entity(entity)
-                .insert_bundle(DoorCollision::default());
-        }
-    }
-}
-
-fn door_open_tracker(
+fn track_door_switches(
     mut door_query: Query<&mut Activators, With<Door>>,
     mut pressed_event: EventReader<SwitchPressedEvent>,
 ) {

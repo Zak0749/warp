@@ -209,7 +209,6 @@ version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4fce306d40a111309ee61d4626efbafccdd46bb80657122c38061fa7264c08e4"
 dependencies = [
- "bevy_dylib",
  "bevy_internal",
 ]
 
@@ -388,15 +387,6 @@ dependencies = [
  "bevy_ecs",
  "bevy_log",
  "bevy_utils",
-]
-
-[[package]]
-name = "bevy_dylib"
-version = "0.7.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6bf02ce7a578743cd94cb38dc7a9b405d6058a2317011744371eaa56b4d6e786"
-dependencies = [
- "bevy_internal",
 ]
 
 [[package]]
@@ -1986,6 +1976,18 @@ name = "itoa"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "112c678d4050afce233f4f2852bb2eb519230b3cf12f33585275537d7e41578d"
+
+[[package]]
+name = "iyes_loopless"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2de41e79e600b6d8a49878c3a15c1ab0852c2d982dd638dfacd95d7eadab5193"
+dependencies = [
+ "bevy_app",
+ "bevy_core",
+ "bevy_ecs",
+ "bevy_utils",
+]
 
 [[package]]
 name = "jni"
@@ -3610,6 +3612,7 @@ dependencies = [
  "bevy-inspector-egui",
  "bevy_ecs_ldtk",
  "bevy_rapier2d",
+ "iyes_loopless",
  "leafwing-input-manager",
 ]
 

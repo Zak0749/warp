@@ -1,12 +1,12 @@
-use super::prelude::*;
+use super::*;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(InputManagerPlugin::<PlayerAction>::default())
-            .add_system(player_movement_system)
-            .add_system(player_animation_system)
+            .add_system(player_movement.run_in_state(GameState::InGame).run_not_in_state(InGameState::Paused))
+            .add_system(player_animation.run_in_state(GameState::InGame).run_not_in_state(InGameState::Paused))
             .register_ldtk_entity::<PlayerBundle>("Player");
     }
 }
@@ -119,8 +119,11 @@ impl Default for PlayerInput {
     }
 }
 
-fn player_movement_system(
-    mut player_query: Query<(&mut Velocity, &ActionState<PlayerAction>), With<Player>>,
+fn player_movement(
+    mut player_query: Query<
+        (&mut Velocity, &ActionState<PlayerAction>),
+        (With<Player>, Changed<ActionState<PlayerAction>>),
+    >,
 ) {
     for (mut vel, action_state) in player_query.iter_mut() {
         if action_state.pressed(PlayerAction::Up) {
@@ -146,7 +149,7 @@ impl Default for AnimationTimer {
     }
 }
 
-fn player_animation_system(
+fn player_animation(
     mut player_query: Query<(&mut TextureAtlasSprite, &ActionState<PlayerAction>), With<Player>>,
     mut timer: Local<AnimationTimer>,
     time: Res<Time>,
