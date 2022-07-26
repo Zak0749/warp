@@ -14,7 +14,11 @@ impl Plugin for InGamePlugin {
                 ..Default::default()
             })
             .add_enter_system(GameState::InGame, spawn_level_bundle)
-            .add_system(update_level_selection.run_in_state(GameState::InGame).run_not_in_state(InGameState::Paused))
+            .add_system(
+                update_level_selection
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
             .add_system(set_texture_filters_to_nearest.run_in_state(GameState::InGame));
     }
 }
