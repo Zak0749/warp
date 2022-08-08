@@ -136,7 +136,7 @@ fn game_start(
 ) {
     for action in action_query.iter() {
         if action.pressed(MainMenuAction::StartGame) {
-            commands.insert_resource(NextState(GameState::InGame));
+            commands.insert_resource(NextState(GameState::Loading));
         }
     }
 }

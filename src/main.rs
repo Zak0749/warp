@@ -1,13 +1,15 @@
+use bevy_inspector_egui::WorldInspectorPlugin;
 use warp::*;
 
 fn main() {
-    App::new()
+    let mut app = App::new();
+
+    app.add_plugin(LoadingPlugin)
         .insert_resource(WindowDescriptor {
             width: 512.0,
             height: 512.0,
             ..Default::default()
         })
-        .add_loopless_state(GameState::MainMenu)
         .add_plugins(DefaultPlugins)
         .add_plugin(LdtkPlugin)
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(100.0))
@@ -20,6 +22,7 @@ fn main() {
         .add_plugin(MainMenuPlugin)
         .add_plugin(InGamePlugin)
         .add_plugin(PauseMenuPlugin)
-        .add_plugin(UiCameraPlugin)
+        // .add_plugin(UiCameraPlugin)
+        .add_plugin(WorldInspectorPlugin::default())
         .run();
 }

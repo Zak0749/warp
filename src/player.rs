@@ -5,15 +5,46 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(InputManagerPlugin::<PlayerAction>::default())
-            .add_system(player_movement.run_in_state(GameState::InGame).run_not_in_state(InGameState::Paused))
-            .add_system(player_animation.run_in_state(GameState::InGame).run_not_in_state(InGameState::Paused))
-            .register_ldtk_entity::<PlayerBundle>("Player");
+            .add_system(
+                player_movement
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
+            .add_system(
+                player_animation
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
+            .register_ldtk_entity::<PlayerBundle>("Player")
+            // .add_system(setup_test)
+            // .add_system(
+            //     follower_moving
+            //         .run_in_state(GameState::InGame)
+            //         .run_not_in_state(InGameState::Paused),
+            // )
+            .add_system(
+                player_state_tracker
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
+            .add_system(
+                test_state
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            )
+            .add_system(
+                update_ability
+                    .run_in_state(GameState::InGame)
+                    .run_not_in_state(InGameState::Paused),
+            );
     }
 }
 
 #[derive(Bundle, Default, LdtkEntity)]
 struct PlayerBundle {
     player: Player,
+
+    past_states: PlayerPastStates,
 
     #[from_entity_instance]
     entity_instance: EntityInstance,
@@ -26,6 +57,8 @@ struct PlayerBundle {
     sprite_bundle: SpriteSheetBundle,
     #[bundle]
     input_manager: PlayerInput,
+
+    ability_state: PlayerAbilityState,
 }
 
 #[derive(Component, Default)]
@@ -89,6 +122,7 @@ enum PlayerAction {
     Down,
     Left,
     Right,
+    Ability,
 }
 
 #[derive(Bundle)]
@@ -112,11 +146,29 @@ impl Default for PlayerInput {
                     (KeyCode::Down, Down),
                     (KeyCode::Left, Left),
                     (KeyCode::Right, Right),
+                    (KeyCode::Space, Ability),
                 ]),
                 ..default()
             },
         }
     }
+}
+
+#[derive(Component, Default)]
+struct PlayerPastStates(Vec<PlayerPastState>);
+
+struct PlayerPastState {
+    translation: Vec3,
+    index: usize,
+}
+
+#[derive(Component, Default)]
+enum PlayerAbilityState {
+    Preforming,
+    Cooldown,
+
+    #[default]
+    Idle,
 }
 
 fn player_movement(
@@ -204,3 +256,160 @@ fn player_animation(
         };
     }
 }
+
+struct StateTimer(Timer);
+
+impl Default for StateTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(0.05, false))
+    }
+}
+
+fn player_state_tracker(
+    mut player_query: Query<
+        (
+            &mut PlayerPastStates,
+            &TextureAtlasSprite,
+            &Transform,
+        ),
+        With<Player>,
+    >,
+    mut timer: Local<StateTimer>,
+    time: Res<Time>,
+) {
+    timer.0.tick(time.delta());
+    if timer.0.finished() {
+        for (mut past_states, sprite, transform) in player_query.iter_mut() {
+            if past_states.0.len() > 200 {
+                past_states.0.remove(0);
+            }
+            past_states.0.push(PlayerPastState {
+                translation: transform.translation,
+                index: sprite.index,
+            });
+        }
+    }
+}
+
+fn test_state(
+    mut player_query: Query<(&PlayerAbilityState, &mut TextureAtlasSprite), With<Player>>,
+) {
+    for (ability_state, mut sprite) in player_query.iter_mut() {
+        sprite.color = match ability_state {
+            PlayerAbilityState::Preforming => Color::RED,
+            PlayerAbilityState::Cooldown => Color::GRAY,
+            PlayerAbilityState::Idle => Color::WHITE,
+        };
+    }
+}
+
+struct CooldownTimer(Timer);
+
+impl Default for CooldownTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(3.0, false))
+    }
+}
+
+struct UsageTimer(Timer);
+
+impl Default for UsageTimer {
+    fn default() -> Self {
+        Self(Timer::from_seconds(5.0, false))
+    }
+}
+
+fn update_ability(
+    mut player_query: Query<(&mut PlayerAbilityState, &ActionState<PlayerAction>), With<Player>>,
+    mut cooldown_timer: Local<CooldownTimer>,
+    mut usage_timer: Local<UsageTimer>,
+    time: Res<Time>,
+) {
+    for (mut ability_state, action_state) in player_query.iter_mut() {
+        match *ability_state {
+            PlayerAbilityState::Idle => {
+                if action_state.pressed(PlayerAction::Ability)
+                    && action_state.get_pressed().iter().any(|&x| {
+                        x == PlayerAction::Up
+                            || x == PlayerAction::Down
+                            || x == PlayerAction::Left
+                            || x == PlayerAction::Right
+                    })
+                {
+                    *ability_state = PlayerAbilityState::Preforming;
+                }
+            }
+            PlayerAbilityState::Preforming => {
+                usage_timer.0.tick(time.delta());
+                if !action_state.get_pressed().iter().any(|&x| {
+                    x == PlayerAction::Up
+                        || x == PlayerAction::Down
+                        || x == PlayerAction::Left
+                        || x == PlayerAction::Right
+                }) || usage_timer.0.finished()
+                {
+                    usage_timer.0.reset();
+                    *ability_state = PlayerAbilityState::Cooldown;
+                }
+            }
+            PlayerAbilityState::Cooldown => {
+                cooldown_timer.0.tick(time.delta());
+                if cooldown_timer.0.finished() {
+                    cooldown_timer.0.reset();
+                    *ability_state = PlayerAbilityState::Idle;
+                }
+            }
+        }
+    }
+}
+
+// #[derive(Component, Default)]
+// struct PastPlayer;
+
+// #[derive(Bundle, Default)]
+// struct PastPlayerBundle {
+//     past_player: PastPlayer,
+
+//     #[bundle]
+//     sprite: SpriteBundle,
+
+//     rigid_body: RigidBody,
+//     collider: Collider,
+//     locked_axis: LockedAxes,
+// }
+
+// fn setup_test(mut commands: Commands, player_query: Query<&Transform, Added<Player>>) {
+//     for transform in player_query.iter() {
+//         commands.spawn_bundle(PastPlayerBundle {
+//             sprite: SpriteBundle {
+//                 sprite: Sprite {
+//                     color: Color::GOLD,
+//                     ..default()
+//                 },
+//                 transform: Transform {
+//                     scale: Vec3::new(12.0, 18.0, 1.0),
+//                     translation: player_query.single().translation,
+//                     ..default()
+//                 },
+//                 ..default()
+//             },
+//             rigid_body: RigidBody::KinematicPositionBased,
+//             collider: Collider::cuboid(6.0, 9.0),
+//             locked_axis: LockedAxes::ROTATION_LOCKED,
+//             ..default()
+//         });
+//     }
+// }
+
+// fn follower_moving(
+//     mut follower_query: Query<&mut Transform, With<PastPlayer>>,
+//     player_query: Query<&PlayerPastStates, With<Player>>,
+// ) {
+//     for mut transform in follower_query.iter_mut() {
+//         for past_state in player_query.iter() {
+//             if let Some(past_state) = past_state.0.first() {
+//                 transform.translation = past_state.translation;
+//             }
+//         }
+//     }
+// }

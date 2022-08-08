@@ -6,7 +6,8 @@ impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_enter_system(GameState::InGame, spawn_game_camera)
             .add_system(camera_fit_inside_current_level.run_in_state(GameState::InGame))
-            .add_exit_system(GameState::InGame, remove_game_camera);
+            .add_exit_system(GameState::InGame, remove_game_camera)
+            .add_startup_system(spawn_ui_camera);
     }
 }
 
@@ -85,4 +86,13 @@ fn remove_game_camera(mut commands: Commands, camera_query: Query<Entity, With<G
     for camera in camera_query.iter() {
         commands.entity(camera).despawn();
     }
+}
+
+#[derive(Component, Default)]
+struct UiCamera;
+
+fn spawn_ui_camera(mut commands: Commands) {
+    commands
+        .spawn_bundle(UiCameraBundle::default())
+        .insert(UiCamera);
 }

@@ -1,5 +1,4 @@
 use super::*;
-use bevy::render::render_resource::TextureUsages;
 
 pub struct InGamePlugin;
 
@@ -18,14 +17,13 @@ impl Plugin for InGamePlugin {
                 update_level_selection
                     .run_in_state(GameState::InGame)
                     .run_not_in_state(InGameState::Paused),
-            )
-            .add_system(set_texture_filters_to_nearest.run_in_state(GameState::InGame));
+            );
     }
 }
 
-fn spawn_level_bundle(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_level_bundle(mut commands: Commands, level: Res<LevelAsset>) {
     commands.spawn_bundle(LdtkWorldBundle {
-        ldtk_handle: asset_server.load("Levels.ldtk"),
+        ldtk_handle: level.handle.clone(),
         ..Default::default()
     });
 }
@@ -54,21 +52,6 @@ fn update_level_selection(
                 {
                     *level_selection = LevelSelection::Iid(ldtk_level.level.iid.clone());
                 }
-            }
-        }
-    }
-}
-
-fn set_texture_filters_to_nearest(
-    mut texture_events: EventReader<AssetEvent<Image>>,
-    mut textures: ResMut<Assets<Image>>,
-) {
-    for event in texture_events.iter() {
-        if let AssetEvent::Created { handle } = event {
-            if let Some(mut texture) = textures.get_mut(handle) {
-                texture.texture_descriptor.usage = TextureUsages::TEXTURE_BINDING
-                    | TextureUsages::COPY_SRC
-                    | TextureUsages::COPY_DST;
             }
         }
     }

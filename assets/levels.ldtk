@@ -663,12 +663,12 @@
 									"entityIid": "cf8441a0-02f0-11ed-b439-2f2b367ee4e0",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
+									"worldIid": "228bacb0-02f0-11ed-98bb-b3900ec24e6d"
 								}, {
 									"entityIid": "ceb13a30-02f0-11ed-b439-1fadee9e1943",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
+									"worldIid": "228bacb0-02f0-11ed-98bb-b3900ec24e6d"
 								} ], "__type": "Array<EntityRef>", "__tile": null, "defUid": 52, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["cf8441a0-02f0-11ed-b439-2f2b367ee4e0"]
@@ -699,12 +699,12 @@
 									"entityIid": "cd5b9540-02f0-11ed-b439-0394ad6479a6",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
+									"worldIid": "228bacb0-02f0-11ed-98bb-b3900ec24e6d"
 								}, {
 									"entityIid": "ce17b950-02f0-11ed-b439-377d80ada669",
 									"layerIid": "af628c60-02f0-11ed-b439-f51fcf336502",
 									"levelIid": "268a1e50-02f0-11ed-87a6-1ffb449ecee2",
-									"worldIid": "b06a7db0-02f0-11ed-a8d8-0133a1c705aa"
+									"worldIid": "228bacb0-02f0-11ed-98bb-b3900ec24e6d"
 								} ], "__type": "Array<EntityRef>", "__tile": null, "defUid": 52, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["cd5b9540-02f0-11ed-b439-0394ad6479a6"]
@@ -751,8 +751,8 @@
 							"defUid": 38,
 							"px": [48,200],
 							"fieldInstances": [
-								{ "__identifier": "Height", "__value": 16, "__type": "Float", "__tile": null, "defUid": 57, "realEditorValues": [{ "id": "V_Float", "params": [16] }] },
-								{ "__identifier": "Width", "__value": 16, "__type": "Float", "__tile": null, "defUid": 58, "realEditorValues": [{ "id": "V_Float", "params": [16] }] }
+								{ "__identifier": "Height", "__value": 18, "__type": "Float", "__tile": null, "defUid": 57, "realEditorValues": [{ "id": "V_Float", "params": [18] }] },
+								{ "__identifier": "Width", "__value": 12, "__type": "Float", "__tile": null, "defUid": 58, "realEditorValues": [{ "id": "V_Float", "params": [12] }] }
 							]
 						}
 					]
