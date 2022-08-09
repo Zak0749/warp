@@ -13,11 +13,11 @@ struct BoxBundle {
     r#box: Box,
 
     #[bundle]
-    #[sprite_sheet_bundle]
-    sprite_bundle: SpriteSheetBundle,
+    collider: BoxCollider,
 
     #[bundle]
-    collider: BoxCollider,
+    #[sprite_sheet_bundle]
+    sprite_bundle: SpriteSheetBundle,
 }
 
 #[derive(Component, Default)]

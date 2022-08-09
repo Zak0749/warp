@@ -5,37 +5,19 @@ pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugin(InputManagerPlugin::<PlayerAction>::default())
-            .add_system(
-                player_movement
-                    .run_in_state(GameState::InGame)
-                    .run_not_in_state(InGameState::Paused),
-            )
-            .add_system(
-                player_animation
-                    .run_in_state(GameState::InGame)
-                    .run_not_in_state(InGameState::Paused),
-            )
             .register_ldtk_entity::<PlayerBundle>("Player")
-            // .add_system(setup_test)
-            // .add_system(
-            //     follower_moving
-            //         .run_in_state(GameState::InGame)
-            //         .run_not_in_state(InGameState::Paused),
-            // )
-            .add_system(
-                player_state_tracker
-                    .run_in_state(GameState::InGame)
-                    .run_not_in_state(InGameState::Paused),
-            )
-            .add_system(
-                test_state
-                    .run_in_state(GameState::InGame)
-                    .run_not_in_state(InGameState::Paused),
-            )
-            .add_system(
-                update_ability
-                    .run_in_state(GameState::InGame)
-                    .run_not_in_state(InGameState::Paused),
+            .add_system_set(
+                ConditionSet::new()
+                    .run_in_state(GameState::Game)
+                    .run_not_in_state(PauseState::Paused)
+                    .with_system(player_movement)
+                    .with_system(player_animation)
+                    .with_system(player_state_tracker)
+                    .with_system(update_ability)
+                    .with_system(spawn_past_player)
+                    .with_system(update_past_player)
+                    .with_system(remove_past_when_not_preforming)
+                    .into(),
             );
     }
 }
@@ -43,29 +25,25 @@ impl Plugin for PlayerPlugin {
 #[derive(Bundle, Default, LdtkEntity)]
 struct PlayerBundle {
     player: Player,
-
     past_states: PlayerPastStates,
-
-    #[from_entity_instance]
-    entity_instance: EntityInstance,
+    ability_state: PlayerAbilityState,
 
     #[bundle]
-    #[from_entity_instance]
-    collider: PlayerCollision,
+    collider: PlayerColliderBundle,
+
     #[bundle]
     #[sprite_sheet_bundle]
     sprite_bundle: SpriteSheetBundle,
+
     #[bundle]
     input_manager: PlayerInput,
-
-    ability_state: PlayerAbilityState,
 }
 
 #[derive(Component, Default)]
 pub struct Player;
 
-#[derive(Bundle, Default)]
-struct PlayerCollision {
+#[derive(Bundle)]
+struct PlayerColliderBundle {
     collider: Collider,
     rigid_body: RigidBody,
     velocity: Velocity,
@@ -75,34 +53,10 @@ struct PlayerCollision {
     dampening: Damping,
 }
 
-impl From<EntityInstance> for PlayerCollision {
-    fn from(entity_instance: EntityInstance) -> Self {
-        let width = if let FieldValue::Float(Some(v)) = entity_instance
-            .field_instances
-            .iter()
-            .find(|v| v.identifier == "Width")
-            .expect("Player entity must have a width field")
-            .value
-        {
-            v
-        } else {
-            panic!("Player entity width field must be a float")
-        };
-
-        let height = if let FieldValue::Float(Some(v)) = entity_instance
-            .field_instances
-            .iter()
-            .find(|v| v.identifier == "Height")
-            .expect("Player entity must have a height field")
-            .value
-        {
-            v
-        } else {
-            panic!("Player entity height field must be a float")
-        };
-
+impl Default for PlayerColliderBundle {
+    fn default() -> Self {
         Self {
-            collider: Collider::cuboid(width as f32 / 2.0, height as f32 / 2.0),
+            collider: Collider::cuboid(7.0, 9.0),
             rigid_body: RigidBody::Dynamic,
             velocity: Velocity::zero(),
             gravity_scale: GravityScale(0.0),
@@ -154,15 +108,16 @@ impl Default for PlayerInput {
     }
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Default, Clone)]
 struct PlayerPastStates(Vec<PlayerPastState>);
 
+#[derive(Clone)]
 struct PlayerPastState {
     translation: Vec3,
     index: usize,
 }
 
-#[derive(Component, Default)]
+#[derive(Component, Default, Debug)]
 enum PlayerAbilityState {
     Preforming,
     Cooldown,
@@ -177,7 +132,7 @@ fn player_movement(
         (With<Player>, Changed<ActionState<PlayerAction>>),
     >,
 ) {
-    for (mut vel, action_state) in player_query.iter_mut() {
+    for (mut vel, action_state) in &mut player_query {
         if action_state.pressed(PlayerAction::Up) {
             vel.linvel.y = 100.0;
         }
@@ -202,11 +157,18 @@ impl Default for AnimationTimer {
 }
 
 fn player_animation(
-    mut player_query: Query<(&mut TextureAtlasSprite, &ActionState<PlayerAction>), With<Player>>,
+    mut player_query: Query<
+        (
+            &mut TextureAtlasSprite,
+            &ActionState<PlayerAction>,
+            &PlayerAbilityState,
+        ),
+        With<Player>,
+    >,
     mut timer: Local<AnimationTimer>,
     time: Res<Time>,
 ) {
-    for (mut sprite, action_state) in player_query.iter_mut() {
+    for (mut sprite, action_state, ability_state) in &mut player_query {
         sprite.index = if action_state.pressed(PlayerAction::Left) {
             timer.0.tick(time.delta());
             8 + ((sprite.index
@@ -254,6 +216,11 @@ fn player_animation(
             timer.0.tick(time.delta());
             sprite.index
         };
+
+        match ability_state {
+            PlayerAbilityState::Cooldown => sprite.color = Color::GRAY,
+            _ => sprite.color = Color::WHITE,
+        }
     }
 }
 
@@ -266,21 +233,14 @@ impl Default for StateTimer {
 }
 
 fn player_state_tracker(
-    mut player_query: Query<
-        (
-            &mut PlayerPastStates,
-            &TextureAtlasSprite,
-            &Transform,
-        ),
-        With<Player>,
-    >,
+    mut player_query: Query<(&mut PlayerPastStates, &TextureAtlasSprite, &Transform), With<Player>>,
     mut timer: Local<StateTimer>,
     time: Res<Time>,
 ) {
     timer.0.tick(time.delta());
     if timer.0.finished() {
         for (mut past_states, sprite, transform) in player_query.iter_mut() {
-            if past_states.0.len() > 200 {
+            if past_states.0.len() > 100 {
                 past_states.0.remove(0);
             }
             past_states.0.push(PlayerPastState {
@@ -288,18 +248,6 @@ fn player_state_tracker(
                 index: sprite.index,
             });
         }
-    }
-}
-
-fn test_state(
-    mut player_query: Query<(&PlayerAbilityState, &mut TextureAtlasSprite), With<Player>>,
-) {
-    for (ability_state, mut sprite) in player_query.iter_mut() {
-        sprite.color = match ability_state {
-            PlayerAbilityState::Preforming => Color::RED,
-            PlayerAbilityState::Cooldown => Color::GRAY,
-            PlayerAbilityState::Idle => Color::WHITE,
-        };
     }
 }
 
@@ -325,7 +273,7 @@ fn update_ability(
     mut usage_timer: Local<UsageTimer>,
     time: Res<Time>,
 ) {
-    for (mut ability_state, action_state) in player_query.iter_mut() {
+    for (mut ability_state, action_state) in &mut player_query {
         match *ability_state {
             PlayerAbilityState::Idle => {
                 if action_state.pressed(PlayerAction::Ability)
@@ -363,53 +311,66 @@ fn update_ability(
     }
 }
 
-// #[derive(Component, Default)]
-// struct PastPlayer;
+fn spawn_past_player(
+    mut commands: Commands,
+    player_query: Query<
+        (
+            &PlayerAbilityState,
+            &PlayerPastStates,
+            &Handle<TextureAtlas>,
+        ),
+        Changed<PlayerAbilityState>,
+    >,
+) {
+    for (ability_state, past_states, atlas) in &player_query {
+        if matches!(ability_state, PlayerAbilityState::Preforming) {
+            commands
+                .spawn()
+                .insert(PastPlayer)
+                .insert_bundle(PlayerColliderBundle::default())
+                .insert_bundle(SpriteSheetBundle {
+                    sprite: TextureAtlasSprite {
+                        color: Color::CYAN,
+                        index: past_states.0.first().unwrap().index,
+                        ..default()
+                    },
+                    texture_atlas: atlas.clone(),
+                    transform: Transform {
+                        translation: past_states.0.first().unwrap().translation,
+                        // scale: Vec3::new(10.0, 10.0, 1.0),
+                        ..default()
+                    },
+                    ..default()
+                });
+        };
+    }
+}
 
-// #[derive(Bundle, Default)]
-// struct PastPlayerBundle {
-//     past_player: PastPlayer,
+fn update_past_player(
+    player_query: Query<&PlayerPastStates, With<Player>>,
+    mut past_player_query: Query<(&mut Transform, &mut TextureAtlasSprite), With<PastPlayer>>,
+) {
+    for past_states in &player_query {
+        for (mut transform, mut sprite) in &mut past_player_query {
+            transform.translation = past_states.0.first().unwrap().translation;
+            sprite.index = past_states.0.first().unwrap().index;
+        }
+    }
+}
 
-//     #[bundle]
-//     sprite: SpriteBundle,
+fn remove_past_when_not_preforming(
+    mut commands: Commands,
+    player_query: Query<&PlayerAbilityState, Changed<PlayerAbilityState>>,
+    past_player_query: Query<Entity, (With<PastPlayer>, Without<Player>)>,
+) {
+    for ability_state in &player_query {
+        if !matches!(ability_state, PlayerAbilityState::Preforming) {
+            for past_player_entity in &past_player_query {
+                commands.entity(past_player_entity).despawn_recursive();
+            }
+        }
+    }
+}
 
-//     rigid_body: RigidBody,
-//     collider: Collider,
-//     locked_axis: LockedAxes,
-// }
-
-// fn setup_test(mut commands: Commands, player_query: Query<&Transform, Added<Player>>) {
-//     for transform in player_query.iter() {
-//         commands.spawn_bundle(PastPlayerBundle {
-//             sprite: SpriteBundle {
-//                 sprite: Sprite {
-//                     color: Color::GOLD,
-//                     ..default()
-//                 },
-//                 transform: Transform {
-//                     scale: Vec3::new(12.0, 18.0, 1.0),
-//                     translation: player_query.single().translation,
-//                     ..default()
-//                 },
-//                 ..default()
-//             },
-//             rigid_body: RigidBody::KinematicPositionBased,
-//             collider: Collider::cuboid(6.0, 9.0),
-//             locked_axis: LockedAxes::ROTATION_LOCKED,
-//             ..default()
-//         });
-//     }
-// }
-
-// fn follower_moving(
-//     mut follower_query: Query<&mut Transform, With<PastPlayer>>,
-//     player_query: Query<&PlayerPastStates, With<Player>>,
-// ) {
-//     for mut transform in follower_query.iter_mut() {
-//         for past_state in player_query.iter() {
-//             if let Some(past_state) = past_state.0.first() {
-//                 transform.translation = past_state.translation;
-//             }
-//         }
-//     }
-// }
+#[derive(Component, Default)]
+struct PastPlayer;

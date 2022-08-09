@@ -6,13 +6,13 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy = { version = "0.7" }
-bevy_ecs_ldtk = { version = "0.3", features = ["atlas"] }
-leafwing-input-manager = "0.4.0"
-bevy_rapier2d = "0.15.0"
-bevy-inspector-egui = "0.11"
-iyes_loopless = { version = "0.5.1" }
-bevy_asset_loader = { version = "0.11.0", features = ["stageless"] }
+bevy = "0.8"
+leafwing-input-manager = "0.5.0"
+bevy_asset_loader = { version = "0.12.0", features = ["stageless"] }
+iyes_loopless = { version = "0.7.0" }
+bevy_rapier2d = "0.16.0"
+bevy_ecs_ldtk = { path = "bevy_ecs_ldtk", features = ["atlas"] }
+bevy_kira_audio = "0.11"
 
 [profile.dev.package."*"]
 opt-level = 3
